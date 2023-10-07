@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         227229 bot test
+// @name         227229 bot
 // @namespace    http://tampermonkey.net/
-// @version      1.4
+// @version      2.3
 // @description  很喜欢jg的一句话，明天下午东南亚单排
 // @author       Reesedog
 // @match        https://www.douyu.com/227229*
@@ -24,40 +24,36 @@
         // todo: "(emoji+词语)x5",
     ];
 
-    const usernames = [
-        "ameame",
-        "SetsuRy",
-        "ctyzzz",
-        "yyfyyf",
-        "阿梓梓梓梓丶",
-        "徐志雷Burning",
-        "张宁xiao8",
-        // 根据需要添加更多模板
-    ];
+    const cosplayGroups = {
+        "CP组": ["烈女不怕死丶"],
+        "偶像组": ["徐志雷Burning"],
+        "仇人组": ["yyfyyf", "yyfyyf", "LGD_y", "LGD_Faithbian", "张宁xiao8", "Maybeee222"],
+        "皮套组": ["七海nana7mi", "阿梓梓梓梓丶"],
+        "mdy组：": ["ameame", "SetsuRy", "kaka胡良智", "inflame丶hyz", "ctyzzz", "September猫", "Ori曾焦阳","节奏魔王oldeLeVeN", "嘟嘟Lzk", "阿发ava", "xmxm211"],
+        "永远幻念": ["幻像踩花", "AI猫雷"]
+    };
+
 
     // 创建浮动窗口
     let floatWindow = document.createElement("div");
     floatWindow.style.display = "flex";
     floatWindow.style.position = "fixed";
-    floatWindow.style.top = "50%";
+    floatWindow.style.top = "30%";
     floatWindow.style.right = "0";
     floatWindow.style.transform = "translateY(-50%)";
     floatWindow.style.backgroundColor = "white";
     floatWindow.style.border = "1px solid black";
     floatWindow.style.padding = "10px";
     floatWindow.style.zIndex = "10000";
+    floatWindow.style.flexDirection = "column"; // 添加这一行来使元素竖向排列
+
     document.body.appendChild(floatWindow);
 
-    // 创建浮窗容器
-    let contentContainer = document.createElement("div");
-    contentContainer.style.paddingTop = "5px";
-    contentContainer.style.display = "none";
-    floatWindow.appendChild(contentContainer);
-
-    // 创建下拉菜单
+    // 创建模板下拉菜单
     let templateMenu = document.createElement("select");
+    templateMenu.style.width = "323px";
 
-    // 添加占位符选项
+    // 添加模板占位符选项
     let placeholderOption = document.createElement("option");
     placeholderOption.value = "";
     placeholderOption.textContent = "弹幕模板";
@@ -75,6 +71,7 @@
 
     // 创建cosplay下拉菜单
     let cosplay = document.createElement("select");
+    cosplay.style.width = "323px";
 
     // 添加cosplay占位符选项
     let cosplayPlaceHolder = document.createElement("option");
@@ -84,23 +81,30 @@
     cosplayPlaceHolder.selected = true;
     cosplay.appendChild(cosplayPlaceHolder);
 
-    // 添加cosplay选项
-    usernames.forEach((username) => {
-        let option = document.createElement("option");
-        option.value = username;
-        option.textContent = username;
-        cosplay.appendChild(option);
-    });
-    contentContainer.appendChild(cosplay);
-    contentContainer.appendChild(templateMenu);
+    // 添加分组和选项
+    for (let group in cosplayGroups) {
+        let optgroup = document.createElement("optgroup");
+        optgroup.label = group;
+        cosplayGroups[group].forEach((username) => {
+            let option = document.createElement("option");
+            option.value = username;
+            option.textContent = username;
+            optgroup.appendChild(option);
+        });
+        cosplay.appendChild(optgroup);
+    }
+    // contentContainer.appendChild(cosplay);
+    // contentContainer.appendChild(templateMenu);
 
 
     // 创建输入框
-    let inputField = document.createElement("input");
-    inputField.type = "text";
+    let inputField = document.createElement("textarea");
+    inputField.rows = 4;
+    inputField.cols = 70;
+
     inputField.style.width = "200px";
-    inputField.style.marginLeft = "10px";
-    contentContainer.appendChild(inputField);
+    // inputField.style.marginLeft = "10px";
+    // contentContainer.appendChild(inputField);
 
     // 创建发送按钮
     let sendButton = document.createElement("button");
@@ -109,7 +113,7 @@
     sendButton.style.paddingLeft = "10px";
     sendButton.style.paddingRight = "10px";
     sendButton.style.border = "1px solid black";
-    contentContainer.appendChild(sendButton);
+    // contentContainer.appendChild(sendButton);
 
     // 创建折叠/展开按钮
     let toggleButton = document.createElement("button");
@@ -145,6 +149,10 @@
         }
     };
 
+    sendButton.addEventListener("click", function() {
+        window.scrollTo(0, 0); // 滚动到页面顶部
+    });
+
     // 下拉菜单变更事件
     templateMenu.onchange = function () {
         inputField.value = templateMenu.value;
@@ -154,12 +162,64 @@
     toggleButton.onclick = function () {
         if (contentContainer.style.display === "none") {
             contentContainer.style.display = "block";
-            toggleButton.textContent = "x";
+            toggleButton.textContent = "×";
         } else {
             contentContainer.style.display = "none";
             toggleButton.textContent = "🤡";
         }
     };
+
+    // 创建浮窗容器
+    let contentContainer = document.createElement("div");
+    contentContainer.style.paddingTop = "5px";
+    contentContainer.style.display = "none";
+    floatWindow.appendChild(contentContainer);
+
+    // 创建表格
+    let table = document.createElement("table");
+    contentContainer.appendChild(table);
+
+    // 创建第一行：Cosplay下拉菜单
+    let row1 = document.createElement("tr");
+    let cell1_1 = document.createElement("td");
+    cell1_1.textContent = "Cosplay：";
+    row1.appendChild(cell1_1);
+
+    let cell1_2 = document.createElement("td");
+    cell1_2.appendChild(cosplay);
+    row1.appendChild(cell1_2);
+
+    table.appendChild(row1);
+
+    // 创建第二行：弹幕模板下拉菜单
+    let row2 = document.createElement("tr");
+    let cell2_1 = document.createElement("td");
+    cell2_1.textContent = "弹幕模板：";
+    row2.appendChild(cell2_1);
+
+    let cell2_2 = document.createElement("td");
+    cell2_2.appendChild(templateMenu);
+    row2.appendChild(cell2_2);
+
+    table.appendChild(row2);
+
+
+    // 创建第三行：输入框和发送按钮
+    let row3 = document.createElement("tr");
+
+    let cell3_1 = document.createElement("td");
+    cell3_1.textContent = "输入弹幕：";
+    row3.appendChild(cell3_1);
+
+    let cell3_2 = document.createElement("td");
+    cell3_2.style.display = "flex";
+    cell3_2.appendChild(inputField);
+
+    inputField.style.marginRight = "10px";
+    cell3_2.appendChild(sendButton);
+
+    row3.appendChild(cell3_2);
+    table.appendChild(row3);
 
     // 拖动逻辑
     let isDragging = false;
@@ -238,6 +298,10 @@
                 hoveredElement.querySelector(".text-edf4e7").textContent;
             sendDanmu(textContent);
         };
+
+        button.addEventListener("click", function() {
+            window.scrollTo(0, 0); // 滚动到页面顶部
+        });
     }
 
     let hoveredElement = null;
@@ -349,5 +413,4 @@
         }, 500);
     });
 
-    // todo: 下播自动发送下播4000+并跳转白石直播间
 })();
